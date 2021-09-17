@@ -25,13 +25,18 @@ SOFTWARE.
 
 import json
 import logging
-import sys
 
 import requests
 from pycoingecko import CoinGeckoAPI
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    stream=sys.stdout, level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO,
+    handlers=[
+        logging.FileHandler("logfile.log", mode="a"),
+        logging.StreamHandler()
+    ]
+)
 logger = logging.getLogger(__name__)
 
 
