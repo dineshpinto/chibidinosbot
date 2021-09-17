@@ -43,10 +43,19 @@ DATA_FOLDER = os.path.join("data")
 
 database_path = os.path.join(DATA_FOLDER, "data.json")
 asset_data = cbd.load_json(filename=database_path)
-total_traits_count, rarities = cbd.get_total_unique_trait_count_and_rarities(asset_data)
+asset_data = cbd.remove_asset_type_from_traits(asset_data, trait_type_to_remove="IQ")
 
 last_mtime = os.path.getmtime(database_path)
 client = discord.Client()
+
+
+def remove_iq_from_traits(asset_data: list) -> list:
+    for asset in asset_data:
+        if asset["traits"]:
+            for traits in asset["traits"]:
+                if traits["trait_type"] == "IQ":
+                    asset["traits"].remove(traits)
+    return asset_data
 
 
 def get_asset_id_from_url(url: str) -> str:
@@ -69,17 +78,15 @@ def _format_mvt(most_valuable_trait: str) -> str:
     return most_valuable_trait
 
 
-def format_message(trait_prices: dict, rarity_score: int, asset: dict) -> discord.Embed:
+def format_message(trait_prices: dict, asset: dict) -> discord.Embed:
     prices = np.array(list(trait_prices.values()))
     most_valuable_trait = _format_mvt(max(trait_prices.items(), key=operator.itemgetter(1))[0])
 
     embeds = discord.Embed(title=f"🤑 {asset['name']} 🤑", url=asset["permalink"])
-    embeds.add_field(name="**Average Price** 💸", value=f"{np.average(prices):.2f} ETH", inline=False)
-    embeds.add_field(name="**Min Price**", value=f"{np.min(prices):.2f} ETH", inline=True)
-    embeds.add_field(name="**Max Price**", value=f"{np.max(prices):.2f} ETH", inline=True)
+    embeds.add_field(name="**Average Price** 💸", value=f"{np.nanmean(prices):.2f} ETH", inline=False)
+    embeds.add_field(name="**Min Price**", value=f"{np.nanmin(prices):.2f} ETH", inline=True)
+    embeds.add_field(name="**Max Price**", value=f"{np.nanmax(prices):.2f} ETH", inline=True)
     embeds.add_field(name="**Most Valuable Trait** 🚀", value=f'{most_valuable_trait}', inline=False)
-    if rarity_score != -1:
-        embeds.add_field(name="**Rarity Score**", value=f'{rarity_score}/100', inline=False)
 
     embeds.set_image(url=asset["image_url"])
     embeds.set_footer(text=f'The Price My Chibi Bot, created by Dinesh#7505\nDisclaimer: No guarantees on prices. '
@@ -98,7 +105,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    global asset_data, last_mtime, database_path, total_traits_count, rarities
+    global asset_data, last_mtime, database_path
 
     if message.author == client.user:
         return
@@ -112,11 +119,12 @@ async def on_message(message):
     if current_mtime != last_mtime:
         logger.info(f"Reloading database from {database_path}  due to changes")
         asset_data = cbd.load_json(filename=database_path)
-        last_mtime = current_mtime
-        total_traits_count, rarities = cbd.get_total_unique_trait_count_and_rarities(asset_data)
+        asset_data = cbd.remove_asset_type_from_traits(asset_data, trait_type_to_remove="IQ")
 
-    content = str(message.content)
-    if content.startswith("https://opensea.io/assets/0xa0f38233688bb578c0a88102a95b846c18bc0ba7/"):
+        last_mtime = current_mtime
+
+    content = str(message.content).lower()
+    if content.startswith("https://opensea.io/assets/0xe12EDaab53023c75473a5A011bdB729eE73545e8/".lower()):
         try:
             # Remove trailing slashes
             if content.endswith("/"):
@@ -138,14 +146,13 @@ async def on_message(message):
             if not single_asset:
                 raise ValueError(f"Asset id {asset_id} not found in database")
 
+            await message.channel.send(f"Crunching the data for {single_asset['name']}...")
+
             # Get median trait prices of single asset
             prices = cbd.get_traits_with_median_prices(asset_data, single_asset)
 
-            # Get rarity
-            rarity_score = cbd.get_rarity_score(single_asset, rarities, total_traits_count)
-
             # Format response to Discord bot
-            response = format_message(prices, rarity_score, single_asset)
+            response = format_message(prices, single_asset)
             await message.channel.send(embed=response)
         except Exception as exc:
             logger.error(f"Exception: {exc}")

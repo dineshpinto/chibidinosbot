@@ -99,12 +99,22 @@ class NFTAnalytics(OpenSeaAPI):
         return asset_data
 
     @staticmethod
+    def remove_asset_type_from_traits(asset_data: list, trait_type_to_remove: str):
+        for asset in asset_data:
+            if asset["traits"]:
+                for traits in asset["traits"]:
+                    if traits["trait_type"] == trait_type_to_remove:
+                        asset["traits"].remove(traits)
+
+        return asset_data
+
+    @staticmethod
     def get_trait_values_for_type(asset_data: list, trait_type: str) -> list:
         trait_values = []
         for asset in asset_data:
             for traits in asset["traits"]:
-                if traits["trait_type"] == trait_type and traits["value"] not in trait_values:
-                    trait_values.append(traits["value"])
+                if traits["trait_type"] == trait_type and str(traits["value"]) not in trait_values:
+                    trait_values.append(str(traits["value"]))
 
         return trait_values
 
@@ -119,8 +129,7 @@ class NFTAnalytics(OpenSeaAPI):
                         if traits["trait_type"] == trait_type and traits["value"] == value:
                             listing_prices_trait.append(float(asset["sell_orders"][0]["base_price"]) / 1e18)
 
-            trait_value_prices[value] = np.median(np.array(listing_prices_trait))
-
+            trait_value_prices[value] = np.nanmedian(np.array(listing_prices_trait))
         return dict(sorted(trait_value_prices.items(), key=lambda item: item[1], reverse=True))
 
     def get_median_prices(self, asset_data: list, traits_dict: dict) -> np.ndarray:
@@ -133,7 +142,7 @@ class NFTAnalytics(OpenSeaAPI):
     def get_traits_with_median_prices(self, asset_data: list, asset: dict) -> dict:
         traits = {}
         for trait in asset["traits"]:
-            traits[trait["trait_type"]] = trait["value"]
+            traits[trait["trait_type"]] = str(trait["value"])
 
         trait_prices = {}
 
