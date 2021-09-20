@@ -34,8 +34,14 @@ import numpy as np
 from config import DISCORD_TOKEN_PMCBOT, DISCORD_GUILD_ID_PMC, DISCORD_GUILD_NAME_PMC
 from src.nft_analytics import NFTAnalytics
 
-logging.basicConfig(filename="logfile.log", filemode='a',
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO,
+    handlers=[
+        logging.FileHandler("logfile.log", mode="a"),
+        logging.StreamHandler()
+    ]
+)
 logger = logging.getLogger(__name__)
 
 cbd = NFTAnalytics("0xe12EDaab53023c75473a5A011bdB729eE73545e8")
@@ -146,7 +152,7 @@ async def on_message(message):
             if not single_asset:
                 raise ValueError(f"Asset id {asset_id} not found in database")
 
-            await message.channel.send(f"Crunching the data for {single_asset['name']}...")
+            await message.channel.send(f"Crunching through 10k data points, just for {single_asset['name']} 😘")
 
             # Get median trait prices of single asset
             prices = cbd.get_traits_with_median_prices(asset_data, single_asset)

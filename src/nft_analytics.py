@@ -33,8 +33,14 @@ from tqdm import tqdm
 
 from .opensea_api import OpenSeaAPI
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    stream=sys.stdout, level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO,
+    handlers=[
+        logging.FileHandler("logfile.log", mode="a"),
+        logging.StreamHandler()
+    ]
+)
 logger = logging.getLogger(__name__)
 
 
