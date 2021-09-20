@@ -31,7 +31,7 @@ from urllib import parse
 import discord
 import numpy as np
 
-from config import DISCORD_TOKEN, DISCORD_GUILD_CBD, DISCORD_GUILD_NAME
+from config import DISCORD_TOKEN_PMCBOT, DISCORD_GUILD_ID_PMC, DISCORD_GUILD_NAME_PMC
 from src.nft_analytics import NFTAnalytics
 
 logging.basicConfig(filename="logfile.log", filemode='a',
@@ -97,7 +97,7 @@ def format_message(trait_prices: dict, asset: dict) -> discord.Embed:
 @client.event
 async def on_ready():
     for guild in client.guilds:
-        if guild.name == DISCORD_GUILD_NAME:
+        if guild.name == DISCORD_GUILD_NAME_PMC:
             logger.info(f'{client.user.name} has connected to {guild.name}(id: {guild.id})!')
             break
 
@@ -111,7 +111,7 @@ async def on_message(message):
         return
 
     # Filter messages not from the price-my-ape channel
-    if str(message.channel.id) != DISCORD_GUILD_CBD:
+    if str(message.channel.id) != DISCORD_GUILD_ID_PMC:
         logger.warning(f"Wrong channel={message.channel}")
         return
 
@@ -169,4 +169,4 @@ async def on_error(event, *args, **kwargs):
             raise
 
 
-client.run(DISCORD_TOKEN)
+client.run(DISCORD_TOKEN_PMCBOT)
