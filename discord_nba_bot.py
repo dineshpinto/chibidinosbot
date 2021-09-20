@@ -25,11 +25,23 @@ SOFTWARE.
 
 import datetime
 import re
-
+import logging
 import discord
 from pbpstats.data_loader import DataNbaScheduleLoader
 
 from config import DISCORD_TOKEN_NBABOT, DISCORD_GUILD_ID_NBA, DISCORD_GUILD_NAME_NBA
+
+
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO,
+    handlers=[
+        logging.FileHandler("logfile_nbabot.log", mode="a"),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
 
 client = discord.Client()
 
