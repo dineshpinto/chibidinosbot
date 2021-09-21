@@ -31,14 +31,14 @@ from urllib import parse
 import discord
 import numpy as np
 
-from config import DISCORD_TOKEN_PMCBOT, DISCORD_GUILD_ID_PMC, DISCORD_GUILD_NAME_PMC
+from config import DISCORD_TOKEN_PMCBOT, DISCORD_CHANNEL_ID_PMC, DISCORD_GUILD_NAME_PMC, CONTRACT_ADDRESS
 from src.nft_analytics import NFTAnalytics
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO,
     handlers=[
-        logging.FileHandler("logfile.log", mode="a"),
+        logging.FileHandler("logfile_pmcbot.log", mode="a"),
         logging.StreamHandler()
     ]
 )
@@ -104,7 +104,7 @@ def format_message(trait_prices: dict, asset: dict) -> discord.Embed:
 async def on_ready():
     for guild in client.guilds:
         if guild.name == DISCORD_GUILD_NAME_PMC:
-            logger.info(f'{client.user.name} has connected to {guild.name}(id: {guild.id})!')
+            logger.info(f'{client.user.name} has connected to {guild.name} (id: {guild.id})!')
             break
 
 
@@ -115,8 +115,8 @@ async def on_message(message):
     if message.author == client.user or message.bot:
         return
 
-    # Filter messages not from the price-my-ape channel
-    if str(message.channel.id) != DISCORD_GUILD_ID_PMC:
+    # Filter messages not from the price-my-chibi channel
+    if str(message.channel.id) != DISCORD_CHANNEL_ID_PMC:
         return
 
     content = str(message.content).lower()
@@ -130,7 +130,8 @@ async def on_message(message):
         asset_data = cbd.remove_asset_type_from_traits(asset_data, trait_type_to_remove="IQ")
         last_mtime = current_mtime
 
-    if content.startswith("https://opensea.io/assets/0xe12EDaab53023c75473a5A011bdB729eE73545e8/".lower()):
+    if content.startswith(f"https://opensea.io/assets/{CONTRACT_ADDRESS}/".lower()):
+        print(True)
         try:
             # Remove trailing slashes
             if content.endswith("/"):

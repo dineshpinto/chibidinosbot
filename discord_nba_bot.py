@@ -29,7 +29,7 @@ import logging
 import discord
 from pbpstats.data_loader import DataNbaScheduleLoader
 
-from config import DISCORD_TOKEN_NBABOT, DISCORD_GUILD_ID_NBA, DISCORD_GUILD_NAME_NBA
+from config import DISCORD_TOKEN_NBABOT, DISCORD_CHANNEL_ID_NBA, DISCORD_GUILD_NAME_NBA
 
 
 logging.basicConfig(
@@ -66,7 +66,7 @@ for schedule in schedule_loader.items:
 async def on_ready():
     for guild in client.guilds:
         if guild.name == DISCORD_GUILD_NAME_NBA:
-            print(f'{client.user.name} has connected to {guild.name}(id: {guild.id})!')
+            logger.info(f'{client.user.name} has connected to {guild.name}(id: {guild.id})!')
             break
 
 
@@ -138,7 +138,7 @@ async def on_message(message):
         return
 
     # Filter messages not from the price-my-ape channel
-    if str(message.channel.id) != DISCORD_GUILD_ID_NBA:
+    if str(message.channel.id) != DISCORD_CHANNEL_ID_NBA:
         return
 
     content = str(message.content).lower()
@@ -159,9 +159,9 @@ async def on_message(message):
                 response = format_next_game_message(game)
                 await message.channel.send(embed=response)
         except Exception as exc:
-            print(f"Exception: {exc}")
+            logger.exception(f"Exception: {exc}")
     else:
-        print(f"Invalid url {message}")
+        logger.debug(f"Invalid message {message}")
 
 
 @client.event

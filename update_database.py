@@ -25,10 +25,11 @@ SOFTWARE.
 
 import os
 
+from config import CONTRACT_ADDRESS
 from src.nft_analytics import NFTAnalytics
 
 if __name__ == "__main__":
-    cbd = NFTAnalytics("0xe12EDaab53023c75473a5A011bdB729eE73545e8")
+    cbd = NFTAnalytics(CONTRACT_ADDRESS)
     DATA_FOLDER = os.path.join("data")
     asset_data = cbd.fetch_data(max_offset=10000)
     cbd.save_json(asset_data, filename=os.path.join(DATA_FOLDER, "data.json"))
