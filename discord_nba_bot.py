@@ -133,6 +133,7 @@ def get_number_from_str(string: str, default=5) -> int:
 @client.event
 async def on_message(message):
     global games2020_21
+
     if message.author == client.user:
         return
 

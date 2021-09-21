@@ -108,17 +108,19 @@ async def on_ready():
             break
 
 
-
 @client.event
 async def on_message(message):
     global asset_data, last_mtime, database_path
 
-    if message.author == client.user:
+    if message.author == client.user or message.bot:
         return
 
     # Filter messages not from the price-my-ape channel
     if str(message.channel.id) != DISCORD_GUILD_ID_PMC:
-        logger.warning(f"Wrong channel={message.channel}")
+        return
+
+    content = str(message.content).lower()
+    if content.startswith("!"):
         return
 
     current_mtime = os.path.getmtime(os.path.join(DATA_FOLDER, "data.json"))
@@ -126,10 +128,8 @@ async def on_message(message):
         logger.info(f"Reloading database from {database_path}  due to changes")
         asset_data = cbd.load_json(filename=database_path)
         asset_data = cbd.remove_asset_type_from_traits(asset_data, trait_type_to_remove="IQ")
-
         last_mtime = current_mtime
 
-    content = str(message.content).lower()
     if content.startswith("https://opensea.io/assets/0xe12EDaab53023c75473a5A011bdB729eE73545e8/".lower()):
         try:
             # Remove trailing slashes
