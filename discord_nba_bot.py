@@ -95,6 +95,16 @@ def format_next_game_message(game: dict) -> discord.Embed:
     return embeds
 
 
+def format_help_message() -> discord.Embed:
+    embeds = discord.Embed(title=f"🏀 nba-bot Helpdesk 🏀")
+    embeds.add_field(name=f"!lastscores", value=f'Will show you the most recent NBA games final score', inline=False)
+    embeds.add_field(name=f"!upcoming", value=f'Will show you the upcoming NBA games', inline=False)
+    embeds.add_field(name=f"Custom ranges", value=f'Add a number to the end of the above commands to get custom '
+                                                  f'data, eg. !upcoming5 will show the next 5 games', inline=False)
+    embeds.set_footer(text=f'nba-bot, created by Dinesh#7505')
+    return embeds
+
+
 def get_last_games(games: list, limit: int) -> list:
     current_time = datetime.datetime.now()
 
@@ -133,24 +143,17 @@ def get_number_from_str(string: str, default=5) -> int:
 
 @tasks.loop(hours=24)
 async def next_games_daily():
-    # TODO: Beta version
+    await client.wait_until_ready()
     try:
         message_channel = client.get_channel(DISCORD_CHANNEL_ID_NBA)
         logger.info(f"Sending daily message to {message_channel}")
-        await message_channel.send(embed="Your daily NBA schedule, served with ☕")
+        await message_channel.send("Your daily NBA schedule, served with ☕")
         next_games = get_next_games(games2021_22, limit=3)
         for game in next_games:
             response = format_next_game_message(game)
             await message_channel.send(embed=response)
     except Exception as exc:
         logger.exception(f"Exception: {exc}")
-
-
-@next_games_daily.before_loop
-async def before():
-    # TODO: Beta version
-    await client.wait_until_ready()
-    logger.debug("Finished waiting")
 
 
 @client.event
@@ -161,30 +164,35 @@ async def on_message(message):
         return
 
     # Filter messages not from the price-my-ape channel
-    if str(message.channel.id) != DISCORD_CHANNEL_ID_NBA:
+    if message.channel.id != DISCORD_CHANNEL_ID_NBA:
         return
 
     content = str(message.content).lower()
+    logger.info(f"Message={message}")
     if content.startswith("!lastscores".lower()):
-        logger.info(f"Message={message}")
         try:
             limit = get_number_from_str(content, default=3)
             last_games = get_last_games(games2020_21, limit)
             for game in last_games:
                 response = format_last_game_message(game)
                 await message.channel.send(embed=response)
+            logger.info(f"Successfully sent lastscores")
         except Exception as exc:
             print(f"Exception: {exc}")
     elif content.startswith("!upcoming".lower()):
-        logger.info(f"Message={message}")
         try:
             limit = get_number_from_str(content, default=3)
             next_games = get_next_games(games2021_22, limit)
             for game in next_games:
                 response = format_next_game_message(game)
                 await message.channel.send(embed=response)
+            logger.info(f"Successfully sent upcoming")
         except Exception as exc:
             logger.exception(f"Exception: {exc}")
+    elif content.startswith("!nbahelp".lower()):
+        response = format_help_message()
+        await message.channel.send(embed=response)
+        logger.info(f"Successfully sent help")
     else:
         logger.debug(f"Invalid message {message}")
 
