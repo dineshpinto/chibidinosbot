@@ -97,10 +97,10 @@ def format_next_game_message(game: dict) -> discord.Embed:
 
 def format_help_message() -> discord.Embed:
     embeds = discord.Embed(title=f"🏀 nba-bot Helpdesk 🏀")
-    embeds.add_field(name=f"!lastscores", value=f'Will show you the most recent NBA games final score', inline=False)
-    embeds.add_field(name=f"!upcoming", value=f'Will show you the upcoming NBA games', inline=False)
-    embeds.add_field(name=f"Custom ranges", value=f'Add a number to the end of the above commands to get custom '
-                                                  f'data, eg. !upcoming5 will show the next 5 games', inline=False)
+    embeds.add_field(name=f"!lastscores", value=f'Shows you the final scores of the most recent NBA games', inline=False)
+    embeds.add_field(name=f"!upcoming", value=f'Shows you upcoming NBA games', inline=False)
+    embeds.add_field(name=f"Custom ranges", value=f'Add a number to the end of the above commands to get a custom range'
+                                                  f'eg. `!upcoming5` will show the next 5 games', inline=False)
     embeds.set_footer(text=f'nba-bot, created by Dinesh#7505')
     return embeds
 
