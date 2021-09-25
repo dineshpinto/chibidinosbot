@@ -143,6 +143,7 @@ async def on_message(message):
 
     content = str(message.content).lower()
     if content.startswith("!lastscores".lower()):
+        logger.info(f"Message={message}")
         try:
             limit = get_number_from_str(content, default=3)
             last_games = get_last_games(games2020_21, limit)
@@ -152,6 +153,7 @@ async def on_message(message):
         except Exception as exc:
             print(f"Exception: {exc}")
     elif content.startswith("!upcoming".lower()):
+        logger.info(f"Message={message}")
         try:
             limit = get_number_from_str(content, default=3)
             next_games = get_next_games(games2021_22, limit)
