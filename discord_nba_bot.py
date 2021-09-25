@@ -27,6 +27,7 @@ import datetime
 import re
 import logging
 import discord
+from discord.ext import tasks
 from pbpstats.data_loader import DataNbaScheduleLoader
 
 from config import DISCORD_TOKEN_NBABOT, DISCORD_CHANNEL_ID_NBA, DISCORD_GUILD_NAME_NBA
@@ -130,6 +131,28 @@ def get_number_from_str(string: str, default=5) -> int:
         return default
 
 
+@tasks.loop(hours=24)
+async def next_games_daily():
+    # TODO: Beta version
+    try:
+        message_channel = client.get_channel(DISCORD_CHANNEL_ID_NBA)
+        logger.info(f"Sending daily message to {message_channel}")
+        await message_channel.send(embed="Your daily NBA schedule, served with ☕")
+        next_games = get_next_games(games2021_22, limit=3)
+        for game in next_games:
+            response = format_next_game_message(game)
+            await message_channel.send(embed=response)
+    except Exception as exc:
+        logger.exception(f"Exception: {exc}")
+
+
+@next_games_daily.before_loop
+async def before():
+    # TODO: Beta version
+    await client.wait_until_ready()
+    logger.debug("Finished waiting")
+
+
 @client.event
 async def on_message(message):
     global games2020_21
@@ -174,5 +197,5 @@ async def on_error(event, *args, **kwargs):
         else:
             raise
 
-
+next_games_daily.start()
 client.run(DISCORD_TOKEN_NBABOT)
