@@ -92,7 +92,7 @@ def format_message(trait_prices: dict, asset: dict, user_name: str) -> discord.E
                                           f'{asset["IQ"]} IQ', inline=False)
 
     embeds.set_image(url=asset["image_url"])
-    embeds.set_footer(text=f'The Price My Chibi Bot, created by Dinesh#7505\nDisclaimer: No guarantees on prices. '
+    embeds.set_footer(text=f'The Price My Dino Bot, created by Dinesh#7505\nDisclaimer: No guarantees on prices. '
                            f'Estimates are based on value of traits from historical listing data.')
     return embeds
 
