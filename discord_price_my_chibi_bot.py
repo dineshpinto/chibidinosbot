@@ -111,17 +111,14 @@ async def on_ready():
 @client.event
 async def on_message(message):
     global asset_data, last_mtime, database_path
-
-    if message.author == client.user or message.bot:
+    if message.author == client.user:
         return
 
     # Filter messages not from the price-my-chibi channel
-    if str(message.channel.id) != DISCORD_CHANNEL_ID_PMC:
+    if message.channel.id != DISCORD_CHANNEL_ID_PMC:
         return
 
     content = str(message.content).lower()
-    if content.startswith("!"):
-        return
 
     current_mtime = os.path.getmtime(os.path.join(DATA_FOLDER, "data.json"))
     if current_mtime != last_mtime:
@@ -131,7 +128,6 @@ async def on_message(message):
         last_mtime = current_mtime
 
     if content.startswith(f"https://opensea.io/assets/{CONTRACT_ADDRESS}/".lower()):
-        print(True)
         try:
             # Remove trailing slashes
             if content.endswith("/"):
@@ -153,7 +149,7 @@ async def on_message(message):
             if not single_asset:
                 raise ValueError(f"Asset id {asset_id} not found in database")
 
-            await message.channel.send(f"Crunching through 10k data points, just for {single_asset['name']} 😘")
+            await message.channel.send(f"Crunching through 10k data points, just for you {message.author.name} 😉, hold tight!")
 
             # Get median trait prices of single asset
             prices = cbd.get_traits_with_median_prices(asset_data, single_asset)
@@ -169,7 +165,7 @@ async def on_message(message):
 
 @client.event
 async def on_error(event, *args, **kwargs):
-    with open('err.log', 'a') as f:
+    with open('err2.log', 'a') as f:
         if event == 'on_message':
             f.write(f'Unhandled message: {args[0]}\n')
         else:
