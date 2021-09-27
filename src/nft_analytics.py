@@ -25,10 +25,11 @@ SOFTWARE.
 
 import json
 import logging
-import sys
 from json import JSONDecodeError
 from typing import Tuple
+
 import numpy as np
+import scipy.stats as scs
 from tqdm import tqdm
 
 from .opensea_api import OpenSeaAPI
@@ -103,6 +104,24 @@ class NFTAnalytics(OpenSeaAPI):
             asset_data = json.load(f)
 
         return asset_data
+
+    @staticmethod
+    def extract_asset_type_from_traits(asset_data: list, trait_type_to_extract: str) -> dict:
+        trait_type = {}
+
+        for asset in asset_data:
+            for trait in asset["traits"]:
+                if trait["trait_type"] == trait_type_to_extract:
+                    trait_type[asset["token_id"]] = int(trait["value"])
+        return trait_type
+
+    @staticmethod
+    def get_percentile_score(scores: dict):
+        percentile_scores = {}
+
+        for asset_id, iq in scores.items():
+            percentile_scores[asset_id] = int(scs.percentileofscore(np.array(list(scores.values())), iq))
+        return percentile_scores
 
     @staticmethod
     def remove_asset_type_from_traits(asset_data: list, trait_type_to_remove: str):
