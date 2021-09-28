@@ -81,18 +81,25 @@ def _format_mvt(most_valuable_trait: str) -> str:
 
 def format_message(trait_prices: dict, asset: dict, user_name: str) -> discord.Embed:
     prices = np.array(list(trait_prices.values()))
+
+    prices_min = []
+    for trait_type_and_value, price in trait_prices.items():
+        if "#" not in trait_type_and_value:
+            prices_min.append(price)
+    prices_min = np.array(prices_min)
+
     most_valuable_trait = _format_mvt(max(trait_prices.items(), key=operator.itemgetter(1))[0])
 
     embeds = discord.Embed(title=f"🤑 {asset['name']} for {user_name} 🤑", url=asset["permalink"])
     embeds.add_field(name="**Average Price** 💸", value=f"{np.nanmean(prices):.2f} ETH", inline=False)
-    embeds.add_field(name="**Min Price**", value=f"{np.nanmin(prices):.2f} ETH", inline=True)
+    embeds.add_field(name="**Min Price**", value=f"{np.nanmin(prices_min):.2f} ETH", inline=True)
     embeds.add_field(name="**Max Price**", value=f"{np.nanmax(prices):.2f} ETH", inline=True)
     embeds.add_field(name="**Most Valuable Trait** 🚀", value=f'{most_valuable_trait}', inline=False)
     embeds.add_field(name="**IQ Ranking** 🤯", value=f'{asset["IQ"]} IQ, {asset["IQ_percentile"]}% of Dinos are below '
                                           f'{asset["IQ"]} IQ', inline=False)
 
     embeds.set_image(url=asset["image_url"])
-    embeds.set_footer(text=f'The Price My Dino Bot, created by Dinesh#7505\nDisclaimer: No guarantees on prices. '
+    embeds.set_footer(text=f'Dino Appraisal Bot, created by Dinesh#7505\nDisclaimer: No guarantees on prices. '
                            f'Estimates are based on value of traits from historical listing data.')
     return embeds
 

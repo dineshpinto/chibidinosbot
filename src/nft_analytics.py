@@ -173,6 +173,8 @@ class NFTAnalytics(OpenSeaAPI):
 
         for trait_type, trait_value in traits.items():
             price = self.get_trait_type_median_price(asset_data, trait_type)[trait_value]
+            if "#" in trait_value.lower():
+                price *= 0.1
             trait_prices[trait_value + " " + trait_type] = price
 
         return trait_prices
