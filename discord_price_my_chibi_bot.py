@@ -44,7 +44,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-cbd = NFTAnalytics("0xe12EDaab53023c75473a5A011bdB729eE73545e8")
+cbd = NFTAnalytics(CONTRACT_ADDRESS)
 DATA_FOLDER = os.path.join("data")
 
 database_path = os.path.join(DATA_FOLDER, "data.json")
@@ -52,7 +52,6 @@ asset_data = cbd.load_json(filename=database_path)
 
 iqs = cbd.extract_asset_type_from_traits(asset_data, trait_type_to_extract="IQ")
 iq_percentiles = cbd.get_percentile_score(iqs)
-
 asset_data = cbd.remove_asset_type_from_traits(asset_data, trait_type_to_remove="IQ")
 
 last_mtime = os.path.getmtime(database_path)
