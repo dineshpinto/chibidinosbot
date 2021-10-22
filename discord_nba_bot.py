@@ -47,12 +47,12 @@ logger = logging.getLogger(__name__)
 client = discord.Client()
 
 
-games2020_21 = []
-schedule_loader = DataNbaScheduleLoader("nba", "2020-21", "Regular Season", "web")
-for schedule in schedule_loader.items:
-    if schedule.data["date"].startswith("2021"):
-        schedule.data["date"] = datetime.datetime.strptime(schedule.data["date"], "%Y-%m-%d")
-        games2020_21.append(schedule.data)
+# games2021_22 = []
+# schedule_loader = DataNbaScheduleLoader("nba", "2020-21", "Regular Season", "web")
+# for schedule in schedule_loader.items:
+#     if schedule.data["date"].startswith("2021"):
+#         schedule.data["date"] = datetime.datetime.strptime(schedule.data["date"], "%Y-%m-%d")
+#         games2021_22.append(schedule.data)
 
 
 games2021_22 = []
@@ -143,6 +143,15 @@ def get_number_from_str(string: str, default=3) -> int:
 
 @tasks.loop(hours=24)
 async def next_games_daily():
+    global games2021_22
+
+    games2021_22 = []
+    _schedule_loader = DataNbaScheduleLoader("nba", "2021-22", "Regular Season", "web")
+    for _schedule in _schedule_loader.items:
+        if _schedule.data["date"].startswith("2021"):
+            _schedule.data["date"] = datetime.datetime.strptime(_schedule.data["date"], "%Y-%m-%d")
+            games2021_22.append(_schedule.data)
+
     await client.wait_until_ready()
     try:
         message_channel = client.get_channel(DISCORD_CHANNEL_ID_NBA)
@@ -158,7 +167,7 @@ async def next_games_daily():
 
 @client.event
 async def on_message(message):
-    global games2020_21
+    global games2021_22
 
     if message.author == client.user:
         return
@@ -172,7 +181,7 @@ async def on_message(message):
     if content.startswith("!lastscores".lower()):
         try:
             limit = get_number_from_str(content, default=3)
-            last_games = get_last_games(games2020_21, limit)
+            last_games = get_last_games(games2021_22, limit)
             for game in last_games:
                 response = format_last_game_message(game)
                 await message.channel.send(embed=response)
