@@ -46,15 +46,6 @@ logger = logging.getLogger(__name__)
 
 client = discord.Client()
 
-
-games2020_21 = []
-schedule_loader = DataNbaScheduleLoader("nba", "2020-21", "Regular Season", "web")
-for schedule in schedule_loader.items:
-    if schedule.data["date"].startswith("2021"):
-        schedule.data["date"] = datetime.datetime.strptime(schedule.data["date"], "%Y-%m-%d")
-        games2020_21.append(schedule.data)
-
-
 games2021_22 = []
 schedule_loader = DataNbaScheduleLoader("nba", "2021-22", "Regular Season", "web")
 for schedule in schedule_loader.items:
@@ -129,6 +120,14 @@ def get_next_games(games: list, limit: int) -> list:
     return next_games
 
 
+def get_today_games(games: list) -> list:
+    today_game = []
+    for game in games:
+        if game["date"].date() == datetime.datetime.today().date():
+            today_game.append(game)
+    return today_game
+
+
 def get_number_from_str(string: str, default=3) -> int:
     m = re.search(r'\d+$', string)
     if m is not None:
@@ -142,14 +141,14 @@ def get_number_from_str(string: str, default=3) -> int:
 
 
 @tasks.loop(hours=24)
-async def next_games_daily():
+async def today_games_daily():
     await client.wait_until_ready()
     try:
         message_channel = client.get_channel(DISCORD_CHANNEL_ID_NBA)
         logger.info(f"Sending daily message to {message_channel}")
         await message_channel.send("Your daily NBA schedule, served with ☕")
-        next_games = get_next_games(games2021_22, limit=3)
-        for game in next_games:
+        todays_games = get_today_games(games2021_22)
+        for game in todays_games:
             response = format_next_game_message(game)
             await message_channel.send(embed=response)
     except Exception as exc:
@@ -158,7 +157,7 @@ async def next_games_daily():
 
 @client.event
 async def on_message(message):
-    global games2020_21
+    global games2021_22
 
     if message.author == client.user:
         return
@@ -172,7 +171,7 @@ async def on_message(message):
     if content.startswith("!lastscores".lower()):
         try:
             limit = get_number_from_str(content, default=3)
-            last_games = get_last_games(games2020_21, limit)
+            last_games = get_last_games(games2021_22, limit)
             for game in last_games:
                 response = format_last_game_message(game)
                 await message.channel.send(embed=response)
@@ -205,5 +204,5 @@ async def on_error(event, *args, **kwargs):
         else:
             raise
 
-next_games_daily.start()
+today_games_daily.start()
 client.run(DISCORD_TOKEN_NBABOT)
