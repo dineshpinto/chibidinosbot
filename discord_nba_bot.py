@@ -132,7 +132,7 @@ def get_number_from_str(string: str, default=3) -> int:
     m = re.search(r'\d+$', string)
     if m is not None:
         value = int(m.group())
-        if not value > 0 and value < 10:
+        if not value > 0 and value < 20:
             return default
         else:
             return value
@@ -170,7 +170,7 @@ async def on_message(message):
     logger.info(f"Message={message}")
     if content.startswith("!lastscores".lower()):
         try:
-            limit = get_number_from_str(content, default=3)
+            limit = get_number_from_str(content, default=5)
             last_games = get_last_games(games2021_22, limit)
             for game in last_games:
                 response = format_last_game_message(game)
@@ -180,7 +180,7 @@ async def on_message(message):
             print(f"Exception: {exc}")
     elif content.startswith("!upcoming".lower()):
         try:
-            limit = get_number_from_str(content, default=3)
+            limit = get_number_from_str(content, default=10)
             next_games = get_next_games(games2021_22, limit)
             for game in next_games:
                 response = format_next_game_message(game)
