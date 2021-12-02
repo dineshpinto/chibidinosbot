@@ -101,7 +101,9 @@ def get_last_games(games: list, limit: int) -> list:
 
     last_games = []
     idx = 0
-    for game in games:
+    games_reversed = reversed(games)
+
+    for game in games_reversed:
         if game["date"] < current_time and idx < limit:
             last_games.append(game)
             idx += 1
