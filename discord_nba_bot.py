@@ -96,7 +96,7 @@ def format_help_message() -> discord.Embed:
     return embeds
 
 
-def get_last_games(games: list, limit: int) -> list:
+def get_last_games(games: list, limit: int = 5) -> list:
     current_time = datetime.datetime.now()
 
     last_games = []
@@ -104,7 +104,7 @@ def get_last_games(games: list, limit: int) -> list:
     games_reversed = reversed(games)
 
     for game in games_reversed:
-        if game["date"] < current_time and idx < limit:
+        if game["date"].day < current_time.day and idx < limit:
             last_games.append(game)
             idx += 1
     return last_games
@@ -172,14 +172,14 @@ async def on_message(message):
     logger.info(f"Message={message}")
     if content.startswith("!lastscores".lower()):
         try:
-            limit = get_number_from_str(content, default=5)
-            last_games = get_last_games(games2021_22, limit)
+            # limit = get_number_from_str(content, default=10)
+            last_games = get_last_games(games2021_22)
             for game in last_games:
                 response = format_last_game_message(game)
                 await message.channel.send(embed=response)
             logger.info(f"Successfully sent lastscores")
         except Exception as exc:
-            print(f"Exception: {exc}")
+            logger.exception(f"Exception: {exc}")
     elif content.startswith("!upcoming".lower()):
         try:
             limit = get_number_from_str(content, default=10)
