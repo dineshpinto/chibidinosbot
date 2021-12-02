@@ -172,8 +172,8 @@ async def on_message(message):
     logger.info(f"Message={message}")
     if content.startswith("!lastscores".lower()):
         try:
-            # limit = get_number_from_str(content, default=10)
-            last_games = get_last_games(games2021_22)
+            limit = get_number_from_str(content, default=5)
+            last_games = get_last_games(games2021_22, limit)
             for game in last_games:
                 response = format_last_game_message(game)
                 await message.channel.send(embed=response)
